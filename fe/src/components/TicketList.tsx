@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Search, ChevronRight } from 'lucide-react';
 import { Ticket, TicketStatus, TicketPriority, Department } from '../types/ticket';
-import { ASSIGNEE_OPTIONS } from '../data/assignees';
 
 interface TicketListProps {
   tickets: Ticket[];
@@ -18,10 +17,7 @@ export function TicketList({ tickets, selectedTicket, onSelectTicket }: TicketLi
 
   // Get unique assigned to values
   const assignedToOptions = useMemo(() => {
-    const unique = new Set([
-      ...ASSIGNEE_OPTIONS,
-      ...tickets.map(t => t.assignedTo).filter(Boolean),
-    ]);
+    const unique = new Set(tickets.map(t => t.assignedTo).filter(Boolean));
     return Array.from(unique).filter((assignee) => assignee.trim() !== '');
   }, [tickets]);
 

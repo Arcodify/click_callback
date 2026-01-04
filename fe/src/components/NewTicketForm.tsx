@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Ticket, TicketStatus, TicketPriority, Department } from '../types/ticket';
-import { ASSIGNEE_OPTIONS } from '../data/assignees';
 
 interface NewTicketFormProps {
   onSubmit: (ticket: Omit<Ticket, 'id' | 'createdOn' | 'notes'>) => void;
   onCancel: () => void;
+  assigneeOptions: string[];
 }
 
-export function NewTicketForm({ onSubmit, onCancel }: NewTicketFormProps) {
+export function NewTicketForm({ onSubmit, onCancel, assigneeOptions }: NewTicketFormProps) {
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
@@ -148,7 +148,7 @@ export function NewTicketForm({ onSubmit, onCancel }: NewTicketFormProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <datalist id="assignee-options-new">
-            {ASSIGNEE_OPTIONS.map((assignee) => (
+            {assigneeOptions.map((assignee) => (
               <option key={assignee} value={assignee} />
             ))}
           </datalist>

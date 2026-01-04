@@ -2,10 +2,9 @@ import { Ticket, TicketStatus, Department } from '../types/ticket';
 
 interface DashboardProps {
   tickets: Ticket[];
-  onViewTickets: () => void;
 }
 
-export function Dashboard({ tickets, onViewTickets }: DashboardProps) {
+export function Dashboard({ tickets }: DashboardProps) {
   const getTicketsByStatus = (status: TicketStatus) => 
     tickets.filter(t => t.status === status);
   
@@ -32,19 +31,6 @@ export function Dashboard({ tickets, onViewTickets }: DashboardProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Dashboard Overview</h2>
-          <p className="text-sm text-gray-500">A quick snapshot of open callbacks and team workload.</p>
-        </div>
-        <button
-          onClick={onViewTickets}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-        >
-          View all tickets
-        </button>
-      </div>
-
       {/* Status Cards */}
       <div className="grid grid-cols-3 gap-6">
         {/* Open Calls */}

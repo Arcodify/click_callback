@@ -22,6 +22,16 @@ function App() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showNewTicketForm, setShowNewTicketForm] = useState(false);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const assigneeOptions = useMemo(() => {
+    const unique = new Set<string>();
+    tickets.forEach((ticket) => {
+      const value = ticket.assignedTo?.trim();
+      if (value) unique.add(value);
+    });
+    const currentUser = userName.trim();
+    if (currentUser) unique.add(currentUser);
+    return Array.from(unique).sort((a, b) => a.localeCompare(b));
+  }, [tickets, userName]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -165,69 +175,74 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-400 text-white font-semibold flex items-center justify-center shadow-sm">
-              CC
-            </div>
-            <div>
-              <div className="text-lg font-semibold text-gray-900">Callback Console</div>
-              <div className="text-xs text-gray-500">Queue tracking and assignment management</div>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 justify-end">
-            {error && (
-              <div className="px-3 py-1 text-xs font-medium text-red-700 bg-red-50 rounded-full">
-                {error}
+      <header className="bg-white border-b border-gray-200">
+        <div className="container px-6 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div
+                className="bg-blue-600 text-white rounded-lg shadow-md flex items-center justify-center"
+                style={{ width: 44, height: 44 }}
+              >
+                CC
               </div>
-            )}
-            <div className="flex items-center rounded-full bg-gray-100 p-1">
-              <button
-                onClick={() => { setView('dashboard'); setSelectedTicket(null); }}
-                className={`px-4 py-2 text-sm rounded-full transition-colors ${
-                  view === 'dashboard' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={() => { setView('list'); setSelectedTicket(null); }}
-                className={`px-4 py-2 text-sm rounded-full transition-colors ${
-                  view === 'list' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                All Tickets
-              </button>
+              <div>
+                <h1 className="text-gray-900 font-medium">Callback Console</h1>
+                <div className="text-xs text-gray-500">Queue tracking and assignment management</div>
+              </div>
             </div>
-            <button
-              onClick={() => setShowNewTicketForm(true)}
-              className="px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors shadow-sm"
-            >
-              + New Request
-            </button>
-            <div className="h-8 w-px bg-gray-200" />
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-gray-600">
-                Signed in as <span className="font-semibold text-gray-900">{userName}</span>
+            <div className="flex flex-wrap items-center gap-3 justify-end">
+              {error && (
+                <div className="px-3 py-1 text-xs font-medium text-red-600 bg-gray-100 rounded-lg">
+                  {error}
+                </div>
+              )}
+              <div className="flex items-center rounded-lg bg-gray-100 p-1">
+                <button
+                  onClick={() => { setView('dashboard'); setSelectedTicket(null); }}
+                  className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+                    view === 'dashboard' 
+                      ? 'bg-white text-gray-900 shadow-md' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => { setView('list'); setSelectedTicket(null); }}
+                  className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+                    view === 'list' 
+                      ? 'bg-white text-gray-900 shadow-md' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  All Tickets
+                </button>
               </div>
               <button
-                onClick={handleLogout}
-                className="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                onClick={() => setShowNewTicketForm(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
               >
-                Logout
+                + Add Ticket
               </button>
+              <div className="bg-gray-200" style={{ width: 1, height: 28 }} />
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-gray-600">
+                  Signed in as <span className="font-medium text-gray-900">{userName}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="p-6">
+      <main className="container p-6">
         {loading && (
           <div className="mb-4 text-gray-600">Loading tickets...</div>
         )}
@@ -235,7 +250,7 @@ function App() {
           {/* Left Panel - Dashboard or List */}
           <div className={selectedTicket ? 'w-2/3' : 'w-full'}>
             {view === 'dashboard' ? (
-              <Dashboard tickets={tickets} onViewTickets={() => setView('list')} />
+              <Dashboard tickets={tickets} />
             ) : (
               <TicketList 
                 tickets={tickets} 
@@ -250,6 +265,7 @@ function App() {
               <div className="w-1/3">
                 <TicketDetail
                   ticket={selectedTicket}
+                  assigneeOptions={assigneeOptions}
                   onUpdate={handleUpdateTicket}
                   onDelete={handleDeleteTicket}
                   onAddNote={(content) => handleAddNote(selectedTicket.id, content)}
@@ -268,6 +284,7 @@ function App() {
             <NewTicketForm
               onSubmit={handleCreateTicket}
               onCancel={() => setShowNewTicketForm(false)}
+              assigneeOptions={assigneeOptions}
             />
           </div>
         </div>

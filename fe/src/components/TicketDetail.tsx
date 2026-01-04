@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { X, Edit2, Save, Trash2 } from 'lucide-react';
 import { Ticket, TicketStatus, TicketPriority, Department } from '../types/ticket';
-import { ASSIGNEE_OPTIONS } from '../data/assignees';
 
 interface TicketDetailProps {
   ticket: Ticket;
+  assigneeOptions: string[];
   onUpdate: (id: string, changes: Partial<Ticket>) => Promise<void> | void;
   onDelete: (ticketId: string) => Promise<void> | void;
   onAddNote: (content: string) => Promise<void> | void;
@@ -12,7 +12,15 @@ interface TicketDetailProps {
   onClose: () => void;
 }
 
-export function TicketDetail({ ticket, onUpdate, onDelete, onClose, onAddNote, onDeleteNote }: TicketDetailProps) {
+export function TicketDetail({
+  ticket,
+  assigneeOptions,
+  onUpdate,
+  onDelete,
+  onClose,
+  onAddNote,
+  onDeleteNote,
+}: TicketDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTicket, setEditedTicket] = useState(ticket);
   const [newNote, setNewNote] = useState('');
@@ -252,7 +260,7 @@ export function TicketDetail({ ticket, onUpdate, onDelete, onClose, onAddNote, o
             )}
             {isEditing && (
               <datalist id="assignee-options-edit">
-                {ASSIGNEE_OPTIONS.map((assignee) => (
+                {assigneeOptions.map((assignee) => (
                   <option key={assignee} value={assignee} />
                 ))}
               </datalist>
