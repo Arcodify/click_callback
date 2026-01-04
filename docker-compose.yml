@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: callback-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: callback
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  be:
+    build: ./be
+    container_name: callback-be
+    env_file:
+      - ./be/.env
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+
+  fe:
+    build: ./fe
+    container_name: callback-fe
+    env_file:
+      - ./fe/.env
+    depends_on:
+      - be
+    ports:
+      - "4173:4173"
+
+volumes:
+  db_data:

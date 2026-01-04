@@ -1,0 +1,2 @@
+# This lockfile records the migration provider. Created manually for initial migration.
+provider = "postgresql"
