@@ -19,6 +19,12 @@ export const msalInstance = new PublicClientApplication({
   },
 });
 
+const msalReady = msalInstance.initialize();
+
+export const ensureMsalReady = async () => {
+  await msalReady;
+};
+
 const apiScope = import.meta.env.VITE_AZURE_AD_API_SCOPE;
 const baseScopes = ['openid', 'profile', 'email'];
 

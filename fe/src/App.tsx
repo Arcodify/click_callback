@@ -5,7 +5,7 @@ import { TicketList } from './components/TicketList';
 import { TicketDetail } from './components/TicketDetail';
 import { NewTicketForm } from './components/NewTicketForm';
 import { LoginScreen } from './components/LoginScreen';
-import { apiTokenRequest, loginRequest, msalInstance } from './auth/msal';
+import { apiTokenRequest, ensureMsalReady, loginRequest, msalInstance } from './auth/msal';
 import { Ticket, TicketStatus, TicketPriority, Department } from './types/ticket';
 
 function App() {
@@ -44,8 +44,8 @@ function App() {
   useEffect(() => {
     let mounted = true;
 
-    msalInstance
-      .handleRedirectPromise()
+    ensureMsalReady()
+      .then(() => msalInstance.handleRedirectPromise())
       .then((result) => {
         if (!mounted) return;
         const resolvedAccount =
@@ -85,7 +85,17 @@ function App() {
   }, [account]);
 
   const handleLogin = () => {
-    void msalInstance.loginRedirect(loginRequest);
+    setError(null);
+    if (!import.meta.env.VITE_AZURE_AD_CLIENT_ID) {
+      setError('Missing VITE_AZURE_AD_CLIENT_ID. Check your .env settings.');
+      return;
+    }
+    void ensureMsalReady()
+      .then(() => msalInstance.loginRedirect(loginRequest))
+      .catch((err) => {
+        console.error('Microsoft sign-in failed', err);
+        setError('Microsoft sign-in failed. Please try again.');
+      });
   };
 
   const handleLogout = () => {
@@ -103,6 +113,7 @@ function App() {
       throw new Error('Missing VITE_AZURE_AD_API_SCOPE');
     }
 
+    await ensureMsalReady();
     try {
       const result = await msalInstance.acquireTokenSilent({
         ...apiTokenRequest,
