@@ -17,6 +17,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=4000
 
+RUN apt-get update -y && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY prisma ./prisma
