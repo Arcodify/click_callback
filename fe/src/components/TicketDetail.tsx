@@ -113,6 +113,11 @@ export function TicketDetail({
     window.setTimeout(() => setCopyStatus('idle'), 2000);
   };
 
+  const selectableAssignees =
+    editedTicket.assignedTo && !assigneeOptions.includes(editedTicket.assignedTo)
+      ? [editedTicket.assignedTo, ...assigneeOptions]
+      : assigneeOptions;
+
   const formatDateTime = (date: Date) => {
     return date.toLocaleString('en-US', {
       day: '2-digit',
@@ -335,23 +340,23 @@ export function TicketDetail({
               <span>Assigned To</span>
             </label>
             {isEditing ? (
-              <input
-                type="text"
-                list="assignee-options-edit"
-                placeholder="Search and select a user"
+              <select
                 value={editedTicket.assignedTo}
                 onChange={(e) => setEditedTicket({...editedTicket, assignedTo: e.target.value})}
                 className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                disabled={selectableAssignees.length === 0}
+              >
+                <option value="" disabled>
+                  {selectableAssignees.length ? 'Select a user' : 'No users available'}
+                </option>
+                {selectableAssignees.map((assignee) => (
+                  <option key={assignee} value={assignee}>
+                    {assignee}
+                  </option>
+                ))}
+              </select>
             ) : (
               <div className="mt-1">{ticket.assignedTo}</div>
-            )}
-            {isEditing && (
-              <datalist id="assignee-options-edit">
-                {assigneeOptions.map((assignee) => (
-                  <option key={assignee} value={assignee} />
-                ))}
-              </datalist>
             )}
           </div>
 

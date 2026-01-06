@@ -25,17 +25,18 @@ function App() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [directoryUsers, setDirectoryUsers] = useState<DirectoryUser[]>([]);
   const assigneeOptions = useMemo(() => {
-    const unique = new Set<string>();
-    directoryUsers.forEach((user) => {
-      const value = user.displayName?.trim() || user.userPrincipalName?.trim();
-      if (value) unique.add(value);
-    });
-    tickets.forEach((ticket) => {
-      const value = ticket.assignedTo?.trim();
-      if (value) unique.add(value);
-    });
+    const directoryList = directoryUsers
+      .map((user) => user.displayName?.trim() || user.userPrincipalName?.trim())
+      .filter((value): value is string => Boolean(value));
+    const unique = new Set<string>(directoryList);
+    if (!directoryList.length) {
+      tickets.forEach((ticket) => {
+        const value = ticket.assignedTo?.trim();
+        if (value) unique.add(value);
+      });
+    }
     const currentUser = userName.trim();
-    if (currentUser) unique.add(currentUser);
+    if (currentUser && !unique.has(currentUser)) unique.add(currentUser);
     return Array.from(unique).sort((a, b) => a.localeCompare(b));
   }, [directoryUsers, tickets, userName]);
 
@@ -140,13 +141,24 @@ function App() {
     return fetch(url, { ...init, headers });
   };
 
+  const parseJson = async (res: Response) => {
+    const text = await res.text();
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error('Unexpected server response. Please try again.');
+    }
+  };
+
   const loadTickets = async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await authFetch(`${API_BASE}/tickets`);
       if (!res.ok) throw new Error('Failed to fetch tickets');
-      const data = await res.json();
+      const data = await parseJson(res);
+      if (!data || !Array.isArray(data.data)) throw new Error('Failed to fetch tickets');
       const parsed: Ticket[] = data.data.map(mapApiTicket);
       setTickets(parsed);
     } catch (err) {
@@ -160,8 +172,8 @@ function App() {
     try {
       const res = await authFetch(`${API_BASE}/users`);
       if (!res.ok) throw new Error('Failed to fetch users');
-      const data = await res.json();
-      setDirectoryUsers(data.data || []);
+      const data = await parseJson(res);
+      setDirectoryUsers((data?.data || []) as DirectoryUser[]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load Microsoft users');
     }
@@ -176,7 +188,8 @@ function App() {
         body: JSON.stringify(ticket),
       });
       if (!res.ok) throw new Error('Failed to create ticket');
-      const data = await res.json();
+      const data = await parseJson(res);
+      if (!data?.data) throw new Error('Failed to create ticket');
       const newTicket = mapApiTicket(data.data);
       setTickets([newTicket, ...tickets]);
       setShowNewTicketForm(false);
@@ -195,7 +208,8 @@ function App() {
         body: JSON.stringify(changes),
       });
       if (!res.ok) throw new Error('Failed to update ticket');
-      const data = await res.json();
+      const data = await parseJson(res);
+      if (!data?.data) throw new Error('Failed to update ticket');
       const updated = mapApiTicket(data.data);
       setTickets(tickets.map(t => t.id === id ? updated : t));
       setSelectedTicket(updated);
@@ -225,7 +239,8 @@ function App() {
         body: JSON.stringify({ content, author: userName }),
       });
       if (!res.ok) throw new Error('Failed to add note');
-      const data = await res.json();
+      const data = await parseJson(res);
+      if (!data?.data) throw new Error('Failed to add note');
       const note = {
         id: data.data.id,
         content: data.data.content,

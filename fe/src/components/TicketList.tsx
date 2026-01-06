@@ -13,12 +13,14 @@ export function TicketList({ tickets, selectedTicket, onSelectTicket }: TicketLi
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'all'>('all');
   const [departmentFilter, setDepartmentFilter] = useState<Department | 'all'>('all');
-  const [assignedToFilter, setAssignedToFilter] = useState('');
+  const [assignedToFilter, setAssignedToFilter] = useState('all');
 
   // Get unique assigned to values
   const assignedToOptions = useMemo(() => {
     const unique = new Set(tickets.map(t => t.assignedTo).filter(Boolean));
-    return Array.from(unique).filter((assignee) => assignee.trim() !== '');
+    return Array.from(unique)
+      .filter((assignee) => assignee.trim() !== '')
+      .sort((a, b) => a.localeCompare(b));
   }, [tickets]);
 
   // Filter tickets
@@ -32,9 +34,7 @@ export function TicketList({ tickets, selectedTicket, onSelectTicket }: TicketLi
       const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
       const matchesDepartment = departmentFilter === 'all' || ticket.department === departmentFilter;
-      const trimmedAssignedTo = assignedToFilter.trim();
-      const matchesAssignedTo = trimmedAssignedTo === '' || 
-        ticket.assignedTo.toLowerCase().includes(trimmedAssignedTo.toLowerCase());
+      const matchesAssignedTo = assignedToFilter === 'all' || ticket.assignedTo === assignedToFilter;
 
       return matchesSearch && matchesStatus && matchesPriority && matchesDepartment && matchesAssignedTo;
     });
@@ -124,21 +124,19 @@ export function TicketList({ tickets, selectedTicket, onSelectTicket }: TicketLi
             <option value="Skill Assessment">Skill Assessment</option>
           </select>
 
-          <div>
-            <input
-              type="text"
-              list="assignee-options-filter"
-              placeholder="Search assigned user"
-              value={assignedToFilter}
-              onChange={(e) => setAssignedToFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <datalist id="assignee-options-filter">
-              {assignedToOptions.map((assignee) => (
-                <option key={assignee} value={assignee} />
-              ))}
-            </datalist>
-          </div>
+          <select
+            value={assignedToFilter}
+            onChange={(e) => setAssignedToFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={assignedToOptions.length === 0}
+          >
+            <option value="all">All Assignees</option>
+            {assignedToOptions.map((assignee) => (
+              <option key={assignee} value={assignee}>
+                {assignee}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="text-sm text-gray-600">

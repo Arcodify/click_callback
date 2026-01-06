@@ -138,20 +138,22 @@ export function NewTicketForm({ onSubmit, onCancel, assigneeOptions }: NewTicket
           <label className="block text-sm mb-1">
             Assigned To <span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
+          <select
             required
-            list="assignee-options-new"
-            placeholder="Search and select a user"
             value={formData.assignedTo}
             onChange={(e) => handleChange('assignedTo', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <datalist id="assignee-options-new">
+            disabled={assigneeOptions.length === 0}
+          >
+            <option value="" disabled>
+              {assigneeOptions.length ? 'Select a user' : 'No users available'}
+            </option>
             {assigneeOptions.map((assignee) => (
-              <option key={assignee} value={assignee} />
+              <option key={assignee} value={assignee}>
+                {assignee}
+              </option>
             ))}
-          </datalist>
+          </select>
         </div>
 
         <div>

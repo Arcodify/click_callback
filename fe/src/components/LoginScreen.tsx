@@ -13,6 +13,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
       <div className="login-right">
         <div className="login-right-inner">
           <div className="login-brand">
+            <img className="login-logo" src="/images/logo.webp" alt="Callback Console logo" />
             <h1 className="login-title">Callback requests, organized in one place.</h1>
             <p className="login-subtitle">
               Track open calls, assignments, and notes from a single dashboard.
@@ -28,6 +29,14 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               </p>
             </div>
             <button className="login-button" onClick={onLogin}>
+              <span className="login-button-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation">
+                  <rect x="2" y="2" width="9" height="9" rx="1.2" />
+                  <rect x="13" y="2" width="9" height="9" rx="1.2" />
+                  <rect x="2" y="13" width="9" height="9" rx="1.2" />
+                  <rect x="13" y="13" width="9" height="9" rx="1.2" />
+                </svg>
+              </span>
               Continue with Microsoft
             </button>
             <p className="login-note">You will be redirected to Microsoft to sign in.</p>
