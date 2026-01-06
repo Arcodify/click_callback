@@ -1,3 +1,4 @@
+import { Calendar, CheckCircle, Circle, Clock } from 'lucide-react';
 import { Ticket, TicketStatus, Department } from '../types/ticket';
 
 interface DashboardProps {
@@ -28,163 +29,266 @@ export function Dashboard({ tickets }: DashboardProps) {
   const closedCalls = getTicketsByStatus('Closed');
   const todayTickets = getTicketsToday();
   const weekTickets = getTicketsThisWeek();
+  const todayOpen = todayTickets.filter(t => t.status === 'Open Call').length;
+  const todayInProgress = todayTickets.filter(t => t.status === 'In Progress').length;
+  const todayClosed = todayTickets.filter(t => t.status === 'Closed').length;
+  const weekOpen = weekTickets.filter(t => t.status === 'Open Call').length;
+  const weekInProgressCount = weekTickets.filter(t => t.status === 'In Progress').length;
+  const weekClosed = weekTickets.filter(t => t.status === 'Closed').length;
 
   return (
-    <div className="space-y-6">
+    <div className="dashboard">
       {/* Status Cards */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="dashboard-grid">
         {/* Open Calls */}
-        <div className="bg-gradient-to-br from-orange-400 to-orange-500 text-white rounded-lg p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2>Open Call: {openCalls.length}</h2>
+        <div className="dashboard-card">
+          <div className="dashboard-card-header">
+            <div className="dashboard-card-title">
+              <span className="dashboard-dot dashboard-dot-orange" />
+              <span>Open Call</span>
+            </div>
+            <div className="dashboard-card-value">{openCalls.length}</div>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>CRP:</span>
-              <span>{getTicketsByStatusAndDepartment('Open Call', 'CRP').length}</span>
+          <div className="dashboard-metric-list">
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">CRP:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('Open Call', 'CRP').length}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Education/Migration:</span>
-              <span>{getTicketsByStatusAndDepartment('Open Call', 'Education/Migration').length}</span>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">Education/Migration:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('Open Call', 'Education/Migration').length}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Skill Assessment:</span>
-              <span>{getTicketsByStatusAndDepartment('Open Call', 'Skill Assessment').length}</span>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">Skill Assessment:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('Open Call', 'Skill Assessment').length}</span>
             </div>
           </div>
         </div>
 
         {/* In Progress */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2>In Progress: {inProgress.length}</h2>
+        <div className="dashboard-card">
+          <div className="dashboard-card-header">
+            <div className="dashboard-card-title">
+              <span className="dashboard-dot dashboard-dot-amber" />
+              <span>In Progress</span>
+            </div>
+            <div className="dashboard-card-value">{inProgress.length}</div>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>CRP:</span>
-              <span>{getTicketsByStatusAndDepartment('In Progress', 'CRP').length}</span>
+          <div className="dashboard-metric-list">
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">CRP:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('In Progress', 'CRP').length}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Education/Migration:</span>
-              <span>{getTicketsByStatusAndDepartment('In Progress', 'Education/Migration').length}</span>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">Education/Migration:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('In Progress', 'Education/Migration').length}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Skill Assessment:</span>
-              <span>{getTicketsByStatusAndDepartment('In Progress', 'Skill Assessment').length}</span>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">Skill Assessment:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('In Progress', 'Skill Assessment').length}</span>
             </div>
           </div>
         </div>
 
         {/* Closed Calls */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2>Closed Call: {closedCalls.length}</h2>
+        <div className="dashboard-card">
+          <div className="dashboard-card-header">
+            <div className="dashboard-card-title">
+              <span className="dashboard-dot dashboard-dot-green" />
+              <span>Closed Call</span>
+            </div>
+            <div className="dashboard-card-value">{closedCalls.length}</div>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>CRP:</span>
-              <span>{getTicketsByStatusAndDepartment('Closed', 'CRP').length}</span>
+          <div className="dashboard-metric-list">
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">CRP:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('Closed', 'CRP').length}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Education/Migration:</span>
-              <span>{getTicketsByStatusAndDepartment('Closed', 'Education/Migration').length}</span>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">Education/Migration:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('Closed', 'Education/Migration').length}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Skill Assessment:</span>
-              <span>{getTicketsByStatusAndDepartment('Closed', 'Skill Assessment').length}</span>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">Skill Assessment:</span>
+              <span className="dashboard-metric-value">{getTicketsByStatusAndDepartment('Closed', 'Skill Assessment').length}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="dashboard-grid">
         {/* Today */}
-        <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-          <div className="text-center mb-4">
-            <div className="text-4xl mb-2">{todayTickets.length}</div>
-            <div className="text-gray-600">Total Today</div>
+        <div className="dashboard-card">
+          <div className="dashboard-card-header">
+            <div className="dashboard-card-title">
+              <Calendar className="dashboard-title-icon" />
+              <span>Total Today</span>
+            </div>
+            <div className="dashboard-card-value">{todayTickets.length}</div>
           </div>
-          <div className="space-y-1 text-sm text-gray-600">
-            <div>Open Call: {todayTickets.filter(t => t.status === 'Open Call').length}</div>
-            <div>In Progress Call: {todayTickets.filter(t => t.status === 'In Progress').length}</div>
-            <div>Closed Call: {todayTickets.filter(t => t.status === 'Closed').length}</div>
+          <div className="dashboard-metric-list">
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <Circle className="dashboard-metric-icon dashboard-icon-open" />
+                <span>Open Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{todayOpen}</span>
+            </div>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <Clock className="dashboard-metric-icon dashboard-icon-progress" />
+                <span>In Progress Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{todayInProgress}</span>
+            </div>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <CheckCircle className="dashboard-metric-icon dashboard-icon-closed" />
+                <span>Closed Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{todayClosed}</span>
+            </div>
           </div>
         </div>
 
         {/* This Week */}
-        <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-          <div className="text-center mb-4">
-            <div className="text-4xl mb-2">{weekTickets.length}</div>
-            <div className="text-gray-600">Total This Week</div>
+        <div className="dashboard-card">
+          <div className="dashboard-card-header">
+            <div className="dashboard-card-title">
+              <Calendar className="dashboard-title-icon" />
+              <span>Total This Week</span>
+            </div>
+            <div className="dashboard-card-value">{weekTickets.length}</div>
           </div>
-          <div className="space-y-1 text-sm text-gray-600">
-            <div>Open Call: {weekTickets.filter(t => t.status === 'Open Call').length}</div>
-            <div>In Progress Call: {weekTickets.filter(t => t.status === 'In Progress').length}</div>
-            <div>Closed Call: {weekTickets.filter(t => t.status === 'Closed').length}</div>
+          <div className="dashboard-metric-list">
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <Circle className="dashboard-metric-icon dashboard-icon-open" />
+                <span>Open Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{weekOpen}</span>
+            </div>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <Clock className="dashboard-metric-icon dashboard-icon-progress" />
+                <span>In Progress Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{weekInProgressCount}</span>
+            </div>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <CheckCircle className="dashboard-metric-icon dashboard-icon-closed" />
+                <span>Closed Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{weekClosed}</span>
+            </div>
           </div>
         </div>
 
         {/* Till Date */}
-        <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-          <div className="text-center mb-4">
-            <div className="text-4xl mb-2">{tickets.length}</div>
-            <div className="text-gray-600">Total Till Date</div>
+        <div className="dashboard-card">
+          <div className="dashboard-card-header">
+            <div className="dashboard-card-title">
+              <Calendar className="dashboard-title-icon" />
+              <span>Total Till Date</span>
+            </div>
+            <div className="dashboard-card-value">{tickets.length}</div>
           </div>
-          <div className="space-y-1 text-sm text-gray-600">
-            <div>Open Call: {openCalls.length}</div>
-            <div>In Progress Call: {inProgress.length}</div>
-            <div>Closed Call: {closedCalls.length}</div>
+          <div className="dashboard-metric-list">
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <Circle className="dashboard-metric-icon dashboard-icon-open" />
+                <span>Open Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{openCalls.length}</span>
+            </div>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <Clock className="dashboard-metric-icon dashboard-icon-progress" />
+                <span>In Progress Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{inProgress.length}</span>
+            </div>
+            <div className="dashboard-metric-row">
+              <span className="dashboard-metric-label">
+                <CheckCircle className="dashboard-metric-icon dashboard-icon-closed" />
+                <span>Closed Call:</span>
+              </span>
+              <span className="dashboard-metric-value">{closedCalls.length}</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Department Statistics */}
-      <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-        <h3 className="mb-4">Department Overview</h3>
-        <div className="grid grid-cols-3 gap-6">
-          <div className="border-l-4 border-blue-500 pl-4">
-            <div className="text-2xl mb-1">
+      <div className="dashboard-card">
+        <div className="dashboard-card-header">
+          <div className="dashboard-card-title">Department Overview</div>
+        </div>
+        <div className="dashboard-tile-grid">
+          <div className="dashboard-tile">
+            <span className="dashboard-tile-label">
+              <span className="dashboard-dot dashboard-dot-blue" />
+              <span>CRP</span>
+            </span>
+            <span className="dashboard-tile-value">
               {tickets.filter(t => t.department === 'CRP').length}
-            </div>
-            <div className="text-gray-600">CRP</div>
+            </span>
           </div>
-          <div className="border-l-4 border-purple-500 pl-4">
-            <div className="text-2xl mb-1">
+          <div className="dashboard-tile">
+            <span className="dashboard-tile-label">
+              <span className="dashboard-dot dashboard-dot-purple" />
+              <span>Education/Migration</span>
+            </span>
+            <span className="dashboard-tile-value">
               {tickets.filter(t => t.department === 'Education/Migration').length}
-            </div>
-            <div className="text-gray-600">Education/Migration</div>
+            </span>
           </div>
-          <div className="border-l-4 border-green-500 pl-4">
-            <div className="text-2xl mb-1">
+          <div className="dashboard-tile">
+            <span className="dashboard-tile-label">
+              <span className="dashboard-dot dashboard-dot-green" />
+              <span>Skill Assessment</span>
+            </span>
+            <span className="dashboard-tile-value">
               {tickets.filter(t => t.department === 'Skill Assessment').length}
-            </div>
-            <div className="text-gray-600">Skill Assessment</div>
+            </span>
           </div>
         </div>
       </div>
 
       {/* Priority Overview */}
-      <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-        <h3 className="mb-4">Priority Overview</h3>
-        <div className="grid grid-cols-3 gap-6">
-          <div className="border-l-4 border-red-500 pl-4">
-            <div className="text-2xl mb-1">
+      <div className="dashboard-card">
+        <div className="dashboard-card-header">
+          <div className="dashboard-card-title">Priority Overview</div>
+        </div>
+        <div className="dashboard-tile-grid">
+          <div className="dashboard-tile">
+            <span className="dashboard-tile-label">
+              <span className="dashboard-dot dashboard-dot-red" />
+              <span>High Priority</span>
+            </span>
+            <span className="dashboard-tile-value">
               {tickets.filter(t => t.priority === 'High').length}
-            </div>
-            <div className="text-gray-600">High Priority</div>
+            </span>
           </div>
-          <div className="border-l-4 border-yellow-500 pl-4">
-            <div className="text-2xl mb-1">
+          <div className="dashboard-tile">
+            <span className="dashboard-tile-label">
+              <span className="dashboard-dot dashboard-dot-amber" />
+              <span>Normal Priority</span>
+            </span>
+            <span className="dashboard-tile-value">
               {tickets.filter(t => t.priority === 'Normal').length}
-            </div>
-            <div className="text-gray-600">Normal Priority</div>
+            </span>
           </div>
-          <div className="border-l-4 border-green-500 pl-4">
-            <div className="text-2xl mb-1">
+          <div className="dashboard-tile">
+            <span className="dashboard-tile-label">
+              <span className="dashboard-dot dashboard-dot-green" />
+              <span>Low Priority</span>
+            </span>
+            <span className="dashboard-tile-value">
               {tickets.filter(t => t.priority === 'Low').length}
-            </div>
-            <div className="text-gray-600">Low Priority</div>
+            </span>
           </div>
         </div>
       </div>

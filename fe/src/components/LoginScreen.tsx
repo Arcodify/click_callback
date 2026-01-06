@@ -16,7 +16,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             <h1 className="login-title">Callback requests, organized in one place.</h1>
             <p className="login-subtitle">
               Track open calls, assignments, and notes from a single dashboard.
-              Use the test login while Microsoft sign-in is being finalized.
+              Sign in with Microsoft to continue.
             </p>
           </div>
 
@@ -24,13 +24,13 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             <div>
               <h2 className="login-card-title">Sign in</h2>
               <p className="login-card-subtitle">
-                Continue with the test user to access the dashboard.
+                Use your Microsoft account to access the dashboard.
               </p>
             </div>
             <button className="login-button" onClick={onLogin}>
-              Continue as Test User
+              Continue with Microsoft
             </button>
-            <p className="login-note">Microsoft login will be enabled soon.</p>
+            <p className="login-note">You will be redirected to Microsoft to sign in.</p>
           </div>
         </div>
       </div>

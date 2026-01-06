@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import { InteractionRequiredAuthError, type AccountInfo } from '@azure/msal-browser';
 import { Dashboard } from './components/Dashboard';
 import { TicketList } from './components/TicketList';
 import { TicketDetail } from './components/TicketDetail';
 import { NewTicketForm } from './components/NewTicketForm';
 import { LoginScreen } from './components/LoginScreen';
+import { apiTokenRequest, loginRequest, msalInstance } from './auth/msal';
 import { Ticket, TicketStatus, TicketPriority, Department } from './types/ticket';
 
 function App() {
@@ -12,18 +14,22 @@ function App() {
     return base.endsWith('/') ? base.slice(0, -1) : base;
   }, []);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('test-auth') === 'true';
-  });
-  const [userName, setUserName] = useState('Test User');
+  const [authReady, setAuthReady] = useState(false);
+  const [account, setAccount] = useState<AccountInfo | null>(null);
+  const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'dashboard' | 'list'>('dashboard');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showNewTicketForm, setShowNewTicketForm] = useState(false);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [directoryUsers, setDirectoryUsers] = useState<DirectoryUser[]>([]);
   const assigneeOptions = useMemo(() => {
     const unique = new Set<string>();
+    directoryUsers.forEach((user) => {
+      const value = user.displayName?.trim() || user.userPrincipalName?.trim();
+      if (value) unique.add(value);
+    });
     tickets.forEach((ticket) => {
       const value = ticket.assignedTo?.trim();
       if (value) unique.add(value);
@@ -31,32 +37,103 @@ function App() {
     const currentUser = userName.trim();
     if (currentUser) unique.add(currentUser);
     return Array.from(unique).sort((a, b) => a.localeCompare(b));
-  }, [tickets, userName]);
+  }, [directoryUsers, tickets, userName]);
+
+  const isAuthenticated = Boolean(account);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    let mounted = true;
+
+    msalInstance
+      .handleRedirectPromise()
+      .then((result) => {
+        if (!mounted) return;
+        const resolvedAccount =
+          result?.account ||
+          msalInstance.getActiveAccount() ||
+          msalInstance.getAllAccounts()[0] ||
+          null;
+
+        if (resolvedAccount) {
+          msalInstance.setActiveAccount(resolvedAccount);
+          setAccount(resolvedAccount);
+        }
+      })
+      .catch((err) => {
+        if (!mounted) return;
+        console.error('Microsoft sign-in failed', err);
+        setError('Microsoft sign-in failed. Please try again.');
+      })
+      .finally(() => {
+        if (mounted) setAuthReady(true);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!account) {
+      setUserName('');
+      return;
+    }
+
+    setUserName(account.name || account.username || 'User');
     void loadTickets();
-  }, [isAuthenticated]);
+    void loadDirectoryUsers();
+  }, [account]);
 
   const handleLogin = () => {
-    setIsAuthenticated(true);
-    setUserName('Test User');
-    localStorage.setItem('test-auth', 'true');
+    void msalInstance.loginRedirect(loginRequest);
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('test-auth');
+    const logoutAccount = msalInstance.getActiveAccount() || account || undefined;
     setSelectedTicket(null);
     setShowNewTicketForm(false);
     setView('dashboard');
+    setAccount(null);
+    void msalInstance.logoutRedirect({ account: logoutAccount });
+  };
+
+  const getAccessToken = async () => {
+    if (!account) return null;
+    if (!apiTokenRequest.scopes.length) {
+      throw new Error('Missing VITE_AZURE_AD_API_SCOPE');
+    }
+
+    try {
+      const result = await msalInstance.acquireTokenSilent({
+        ...apiTokenRequest,
+        account,
+      });
+      return result.accessToken;
+    } catch (error) {
+      if (error instanceof InteractionRequiredAuthError) {
+        await msalInstance.acquireTokenRedirect({
+          ...apiTokenRequest,
+          account,
+        });
+        return null;
+      }
+      throw error;
+    }
+  };
+
+  const authFetch = async (url: string, init?: RequestInit) => {
+    const token = await getAccessToken();
+    if (!token) throw new Error('Missing access token');
+    const headers = new Headers(init?.headers || {});
+    headers.set('Authorization', `Bearer ${token}`);
+    return fetch(url, { ...init, headers });
   };
 
   const loadTickets = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/tickets`);
+      const res = await authFetch(`${API_BASE}/tickets`);
       if (!res.ok) throw new Error('Failed to fetch tickets');
       const data = await res.json();
       const parsed: Ticket[] = data.data.map(mapApiTicket);
@@ -68,10 +145,21 @@ function App() {
     }
   };
 
+  const loadDirectoryUsers = async () => {
+    try {
+      const res = await authFetch(`${API_BASE}/users`);
+      if (!res.ok) throw new Error('Failed to fetch users');
+      const data = await res.json();
+      setDirectoryUsers(data.data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load Microsoft users');
+    }
+  };
+
   const handleCreateTicket = async (ticket: Omit<Ticket, 'id' | 'createdOn' | 'notes'>) => {
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/tickets`, {
+      const res = await authFetch(`${API_BASE}/tickets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ticket),
@@ -90,7 +178,7 @@ function App() {
   const handleUpdateTicket = async (id: string, changes: Partial<Ticket>) => {
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/tickets/${id}`, {
+      const res = await authFetch(`${API_BASE}/tickets/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(changes),
@@ -108,7 +196,7 @@ function App() {
   const handleDeleteTicket = async (ticketId: string) => {
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/tickets/${ticketId}`, { method: 'DELETE' });
+      const res = await authFetch(`${API_BASE}/tickets/${ticketId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete ticket');
       setTickets(tickets.filter(t => t.id !== ticketId));
       setSelectedTicket(null);
@@ -120,7 +208,7 @@ function App() {
   const handleAddNote = async (ticketId: string, content: string) => {
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/tickets/${ticketId}/notes`, {
+      const res = await authFetch(`${API_BASE}/tickets/${ticketId}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, author: userName }),
@@ -149,7 +237,7 @@ function App() {
   const handleDeleteNote = async (ticketId: string, noteId: string) => {
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/tickets/${ticketId}/notes/${noteId}`, {
+      const res = await authFetch(`${API_BASE}/tickets/${ticketId}/notes/${noteId}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete note');
@@ -167,6 +255,14 @@ function App() {
       setError(err instanceof Error ? err.message : 'Failed to delete note');
     }
   };
+
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-500">
+        Checking Microsoft session...
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <LoginScreen onLogin={handleLogin} />;
@@ -306,6 +402,13 @@ type ApiTicket = {
   department: Department;
   createdOn: string;
   notes: { id: string; content: string; author: string; timestamp: string }[];
+};
+
+type DirectoryUser = {
+  id: string;
+  displayName: string;
+  email: string;
+  userPrincipalName: string;
 };
 
 function mapApiTicket(ticket: ApiTicket): Ticket {

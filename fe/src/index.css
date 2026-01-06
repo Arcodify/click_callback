@@ -1086,7 +1086,7 @@
 .login-left {
   position: relative;
   min-height: 40vh;
-  background-image: url("/images/hero-image.jpeg");
+  background-image: url("/images/hero-image.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1164,18 +1164,18 @@
 .login-button {
   width: 100%;
   padding: 0.85rem 1rem;
-  background: #f97316;
+  background: #2563eb;
   color: #ffffff;
   border: none;
   border-radius: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.1s ease;
-  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.28);
 }
 
 .login-button:hover {
-  background: #ea580c;
+  background: #1d4ed8;
 }
 
 .login-button:active {
@@ -1186,6 +1186,165 @@
   text-align: center;
   font-size: 0.9rem;
   color: #64748b;
+}
+
+/* Dashboard layout (compact, shadcn-inspired cards) */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.dashboard-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dashboard-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dashboard-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.dashboard-card-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-title-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+}
+
+.dashboard-metric-list {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.dashboard-metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dashboard-metric-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.dashboard-metric-value {
+  color: var(--foreground);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-metric-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.dashboard-icon-open {
+  color: var(--color-orange-500);
+}
+
+.dashboard-icon-progress {
+  color: var(--color-yellow-600);
+}
+
+.dashboard-icon-closed {
+  color: var(--color-green-600);
+}
+
+.dashboard-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dashboard-dot-orange {
+  background: var(--color-orange-500);
+}
+
+.dashboard-dot-amber {
+  background: var(--color-yellow-600);
+}
+
+.dashboard-dot-green {
+  background: var(--color-green-600);
+}
+
+.dashboard-dot-blue {
+  background: var(--color-blue-600);
+}
+
+.dashboard-dot-purple {
+  background: var(--color-purple-600);
+}
+
+.dashboard-dot-red {
+  background: var(--color-red-600);
+}
+
+.dashboard-tile-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.dashboard-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+}
+
+.dashboard-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.dashboard-tile-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
 }
 
   @media (hover: hover) {

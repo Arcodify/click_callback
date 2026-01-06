@@ -5,6 +5,7 @@ import { env } from "./env";
 import { prisma } from "./db";
 import { verifyAccessToken } from "./auth";
 import { registerTicketRoutes } from "./routes/tickets";
+import { registerUserRoutes } from "./routes/users";
 
 export async function buildServer() {
   const app = Fastify({
@@ -43,6 +44,7 @@ export async function buildServer() {
   }));
 
   await app.register(registerTicketRoutes, { prefix: "/tickets" });
+  await app.register(registerUserRoutes, { prefix: "/users" });
 
   app.addHook("onClose", async () => {
     await prisma.$disconnect();

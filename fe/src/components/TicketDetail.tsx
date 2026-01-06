@@ -1,5 +1,21 @@
 import { useEffect, useState } from 'react';
-import { X, Edit2, Save, Trash2 } from 'lucide-react';
+import {
+  Activity,
+  Calendar,
+  Check,
+  Copy,
+  Edit2,
+  FileText,
+  Flag,
+  Folder,
+  Mail,
+  Phone,
+  Save,
+  Trash2,
+  User,
+  UserCheck,
+  X,
+} from 'lucide-react';
 import { Ticket, TicketStatus, TicketPriority, Department } from '../types/ticket';
 
 interface TicketDetailProps {
@@ -26,10 +42,12 @@ export function TicketDetail({
   const [newNote, setNewNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isWorking, setIsWorking] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
 
   useEffect(() => {
     setEditedTicket(ticket);
     setIsEditing(false);
+    setCopyStatus('idle');
   }, [ticket]);
 
   const handleSave = async () => {
@@ -70,6 +88,31 @@ export function TicketDetail({
     }
   };
 
+  const handleCopyContact = async () => {
+    const contactText = `Name: ${editedTicket.fullName}\nEmail: ${editedTicket.email}\nPhone: ${editedTicket.phoneNumber}`;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(contactText);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = contactText;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopyStatus('copied');
+    } catch (error) {
+      setCopyStatus('error');
+    }
+
+    window.setTimeout(() => setCopyStatus('idle'), 2000);
+  };
+
   const formatDateTime = (date: Date) => {
     return date.toLocaleString('en-US', {
       day: '2-digit',
@@ -79,6 +122,12 @@ export function TicketDetail({
       minute: '2-digit'
     });
   };
+
+  const copyLabel = copyStatus === 'copied'
+    ? 'Copied'
+    : copyStatus === 'error'
+      ? 'Copy failed'
+      : 'Copy contact info';
 
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 sticky top-6">
@@ -125,6 +174,21 @@ export function TicketDetail({
             </>
           )}
           <button
+            type="button"
+            onClick={handleCopyContact}
+            className={`p-2 rounded-lg transition-colors ${
+              copyStatus === 'copied'
+                ? 'text-green-600 hover:bg-green-50'
+                : copyStatus === 'error'
+                  ? 'text-red-600 hover:bg-red-50'
+                  : 'text-gray-600 hover:bg-gray-100'
+            }`}
+            title={copyLabel}
+            aria-label={copyLabel}
+          >
+            {copyStatus === 'copied' ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+          </button>
+          <button
             onClick={onClose}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
@@ -138,7 +202,10 @@ export function TicketDetail({
         {/* Basic Info */}
         <div className="space-y-3">
           <div>
-            <label className="text-sm text-gray-600">Full Name</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <User className="w-4 h-4 text-gray-400" />
+              <span>Full Name</span>
+            </label>
             {isEditing ? (
               <input
                 type="text"
@@ -152,7 +219,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Phone Number</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <Phone className="w-4 h-4 text-gray-400" />
+              <span>Phone Number</span>
+            </label>
             {isEditing ? (
               <input
                 type="text"
@@ -166,7 +236,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Email</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <Mail className="w-4 h-4 text-gray-400" />
+              <span>Email</span>
+            </label>
             {isEditing ? (
               <input
                 type="email"
@@ -180,7 +253,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Reason</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-gray-400" />
+              <span>Reason</span>
+            </label>
             {isEditing ? (
               <input
                 type="text"
@@ -194,7 +270,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Priority</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <Flag className="w-4 h-4 text-gray-400" />
+              <span>Priority</span>
+            </label>
             {isEditing ? (
               <select
                 value={editedTicket.priority}
@@ -211,7 +290,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Status</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-gray-400" />
+              <span>Status</span>
+            </label>
             {isEditing ? (
               <select
                 value={editedTicket.status}
@@ -228,7 +310,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Department</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <Folder className="w-4 h-4 text-gray-400" />
+              <span>Department</span>
+            </label>
             {isEditing ? (
               <select
                 value={editedTicket.department}
@@ -245,7 +330,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Assigned To</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-gray-400" />
+              <span>Assigned To</span>
+            </label>
             {isEditing ? (
               <input
                 type="text"
@@ -268,7 +356,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Reported By</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <User className="w-4 h-4 text-gray-400" />
+              <span>Reported By</span>
+            </label>
             {isEditing ? (
               <input
                 type="text"
@@ -282,7 +373,10 @@ export function TicketDetail({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">Created On</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <span>Created On</span>
+            </label>
             <div className="mt-1">{formatDateTime(ticket.createdOn)}</div>
           </div>
         </div>
