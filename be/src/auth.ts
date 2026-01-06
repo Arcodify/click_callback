@@ -8,8 +8,11 @@ declare module "fastify" {
   }
 }
 
-const issuer = `https://login.microsoftonline.com/${env.AZURE_AD_TENANT_ID}/v2.0`;
-const jwks = createRemoteJWKSet(new URL(`${issuer}/discovery/v2.0/keys`));
+const tenantId = env.AZURE_AD_TENANT_ID;
+const issuer = `https://login.microsoftonline.com/${tenantId}/v2.0`;
+const jwks = createRemoteJWKSet(
+  new URL(`https://login.microsoftonline.com/${tenantId}/discovery/v2.0/keys`)
+);
 
 // Verify Azure AD access token signature + issuer + audience.
 export async function verifyAccessToken(token: string) {
