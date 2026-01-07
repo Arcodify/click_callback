@@ -1132,6 +1132,13 @@
   display: block;
 }
 
+.app-logo {
+  width: 44px;
+  height: 44px;
+  display: block;
+  object-fit: contain;
+}
+
 .login-title {
   font-size: 1.75rem;
   line-height: 1.3;

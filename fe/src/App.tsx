@@ -301,12 +301,11 @@ function App() {
         <div className="container px-6 py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div
-                className="bg-blue-600 text-white rounded-lg shadow-md flex items-center justify-center"
-                style={{ width: 44, height: 44 }}
-              >
-                CC
-              </div>
+              <img
+                src="/images/logo.webp"
+                alt="Callback Console logo"
+                className="app-logo"
+              />
               <div>
                 <h1 className="text-gray-900 font-medium">Callback Console</h1>
                 <div className="text-xs text-gray-500">Queue tracking and assignment management</div>

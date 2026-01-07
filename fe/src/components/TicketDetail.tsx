@@ -117,6 +117,10 @@ export function TicketDetail({
     editedTicket.assignedTo && !assigneeOptions.includes(editedTicket.assignedTo)
       ? [editedTicket.assignedTo, ...assigneeOptions]
       : assigneeOptions;
+  const selectableReporters =
+    editedTicket.reportedBy && !assigneeOptions.includes(editedTicket.reportedBy)
+      ? [editedTicket.reportedBy, ...assigneeOptions]
+      : assigneeOptions;
 
   const formatDateTime = (date: Date) => {
     return date.toLocaleString('en-US', {
@@ -366,12 +370,21 @@ export function TicketDetail({
               <span>Reported By</span>
             </label>
             {isEditing ? (
-              <input
-                type="text"
+              <select
                 value={editedTicket.reportedBy}
                 onChange={(e) => setEditedTicket({...editedTicket, reportedBy: e.target.value})}
                 className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                disabled={selectableReporters.length === 0}
+              >
+                <option value="" disabled>
+                  {selectableReporters.length ? 'Select a user' : 'No users available'}
+                </option>
+                {selectableReporters.map((reporter) => (
+                  <option key={reporter} value={reporter}>
+                    {reporter}
+                  </option>
+                ))}
+              </select>
             ) : (
               <div className="mt-1">{ticket.reportedBy}</div>
             )}
